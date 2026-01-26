@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from models import user_db, task_db
 from schemas import UserCreate, UserRead, TaskCreate, Task, TaskBase
+from security import get_api_key
 
 app = FastAPI()
 
@@ -27,7 +28,15 @@ def get_user(user_id: int):
 # ── Tasks ────────────────────────────────────────────────
 
 @app.post("/tasks/", response_model=Task, status_code=201)
-def create_task(task_in: TaskCreate):
+def create_task(
+    task_in: TaskCreate,
+    api_key_info: dict = Depends(get_api_key)
+):
+    # Extract scopes from key_info
+    key_info = api_key_info.get("key_info", {})
+    if "write" not in key_info.get("scopes", []):
+        raise HTTPException(403, "This key does not have write permission")
+    
     if not any(u.id == task_in.user_id for u in user_db):
         raise HTTPException(404, "User not found")
     
