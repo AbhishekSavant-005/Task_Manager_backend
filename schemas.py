@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator, constr
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, constr
 from typing import Optional, Annotated
 from datetime import date
 
@@ -7,6 +7,7 @@ class UserCreate(BaseModel):
     email: EmailStr
 
 class UserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     username: str
     email: EmailStr
@@ -35,6 +36,7 @@ class TaskBase(BaseModel):
 class TaskCreate(TaskBase):
     user_id: int   # renamed for clarity
 
-class Task(TaskBase):
+class TaskRead(TaskBase):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     user_id: int
